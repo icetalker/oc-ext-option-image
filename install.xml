@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Image Radio For Product Options</name>
+    <version>3.0</version>
+    <author>Martin Hwang</author>
+    <code>image_radio</code>
+    <link>http://github.com/icetalker</link>
+    <file path="admin/controller/catalog/option.php">
+        <operation>
+            <search><![CDATA[
+            if ($option['type'] == 'select' || $option['type'] == 'radio' || $option['type'] == 'checkbox' || $option['type'] == 'image') {
+            ]]></search>
+            <add position="replace"><![CDATA[
+            if ($option['type'] == 'select' || $option['type'] == 'radio' || $option['type'] == 'checkbox' || $option['type'] == 'image' || $option['type'] == 'image_radio') {
+            ]]></add>
+        </operation>
+        <operation>
+            <search index="1"><![CDATA[
+            foreach ($option_values as $option_value) {
+            ]]></search>
+            <add position="after"><![CDATA[
+            $image_size = ($option['type'] == 'image_radio')? 100 : 50;
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+            $image = $this->model_tool_image->resize($option_value['image'], 50, 50);
+            ]]></search>
+            <add position="replace" ><![CDATA[
+            $image = $this->model_tool_image->resize($option_value['image'], $image_size, $image_size);
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+            $image = $this->model_tool_image->resize('no_image.png', 50, 50);
+            ]]></search>
+            <add position="replace"><![CDATA[
+            $image = $this->model_tool_image->resize('no_image.png', $image_size, $image_size);
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/controller/catalog/product.php">
+        <operation>
+            <search><![CDATA[
+            if ($product_option['type'] == 'select' || $product_option['type'] == 'radio' || $product_option['type'] == 'checkbox' || $product_option['type'] == 'image') {
+            ]]></search>
+            <add position="replace"><![CDATA[
+            if ($product_option['type'] == 'select' || $product_option['type'] == 'radio' || $product_option['type'] == 'checkbox' || $product_option['type'] == 'image' || $product_option['type'] == 'image_radio') {
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/language/en-gb/catalog/option.php">
+        <operation>
+            <search><![CDATA[
+            $_['text_radio']         = 'Radio';
+            ]]></search>
+            <add position="after"><![CDATA[
+            $_['text_image_radio']   = 'Image Radio';
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/language/zh-cn/catalog/option.php">
+        <operation error="skip">
+            <search><![CDATA[
+            
+            $_['text_radio']         = '单选按钮组';
+            ]]></search>
+            <add position="after"><![CDATA[
+            $_['text_image_radio']   = '图片单选框';
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/model/catalog/product.php">
+        <operation>
+            <search><![CDATA[
+            if ($product_option['type'] == 'select' || $product_option['type'] == 'radio' || $product_option['type'] == 'checkbox' || $product_option['type'] == 'image') {
+            ]]></search>
+            <add position="replace"><![CDATA[
+            if ($product_option['type'] == 'select' || $product_option['type'] == 'radio' || $product_option['type'] == 'checkbox' || $product_option['type'] == 'image' || $product_option['type'] == 'image_radio') {
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/view/template/catalog/option_form.twig">
+        <operation>
+            <search><![CDATA[
+            {% if type == 'checkbox' %}
+            ]]></search>
+            <add position="before"><![CDATA[
+                {% if type == 'image_radio' %}
+                
+                
+                  <option value="image_radio" selected="selected">{{ text_image_radio }}</option>
+                  
+                
+                {% else %}
+                
+                
+                  <option value="image_radio">{{ text_image_radio }}</option>
+                  
+                
+                {% endif %}
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+            if (this.value == 'select' || this.value == 'radio' || this.value == 'checkbox' || this.value == 'image') {
+            ]]></search>
+            <add position="replace"><![CDATA[
+            if (this.value == 'select' || this.value == 'radio' || this.value == 'checkbox' || this.value == 'image'|| this.value == 'image_radio') {
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/view/template/catalog/product_form.twig">
+        <operation>
+            <search><![CDATA[
+            {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' %}
+            ]]></search>
+            <add position="replace"><![CDATA[
+            {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' or product_option.type == 'image_radio' %}
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+            if (item['type'] == 'select' || item['type'] == 'radio' || item['type'] == 'checkbox' || item['type'] == 'image') {
+            ]]></search>
+            <add position="replace"><![CDATA[
+            if (item['type'] == 'select' || item['type'] == 'radio' || item['type'] == 'checkbox' || item['type'] == 'image' || item['type'] == 'image_radio') {
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="catalog/controller/product/product.php">
+        <operation>
+            <search><![CDATA[
+            $product_option_value_data = array();
+            ]]></search>
+            <add position="after"><![CDATA[
+            $image_size = $option['type'] == 'image_radio'? 100 : 50;
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+            'image'                   => $this->model_tool_image->resize($option_value['image'], 50, 50),
+            ]]></search>
+            <add position="replace"><![CDATA[
+            'image'                   => $this->model_tool_image->resize($option_value['image'], $image_size, $image_size),
+            ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/controller/account/order.php">
+        <operation>
+            <search><![CDATA[
+            if ($order_option['type'] == 'select' || $order_option['type'] == 'radio' || $order_option['type'] == 'image') {
+            ]]></search>
+            <add position="replace"><![CDATA[
+                if ($order_option['type'] == 'select' || $order_option['type'] == 'radio' || $order_option['type'] == 'image' || $order_option['type'] == 'image_radio') {
+            ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/view/theme/default/template/product/product.twig">
+        <operation>
+            <search><![CDATA[
+            {% if option.type == 'checkbox' %}
+            ]]></search>
+            <add position="before"><![CDATA[
+            {% if option.type == 'image_radio' %}
+            <div class="form-group{% if option.required %} required {% endif %}">
+              <label class="control-label text-prodecorop">{{ option.name }}</label>
+              <div id="input-option{{ option.product_option_id }}" class="custom-radio" style="display:grid;grid-template-columns:repeat(auto-fill,200px);grid-gap:10px"> {% for option_value in option.product_option_value %}
+                <div class="image_radio">
+                  <label style="background-color:#cba;border-radius:5px;display:flex;">
+                    <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" style="clip:rect(0,0,0,0);position:absolute" />
+                    {% if option_value.image %} <img src="{{ option_value.image }}" alt="{{ option_value.name }} {% if option_value.price %} {{ option_value.price_prefix }} {{ option_value.price }} {% endif %}" data-price="{{ option_value.price }}" style="width:100px;pointer-events:event;border-radius:5px;" /> {% endif %}
+                    <span class="" style="display:inline-block;margin:auto 5px;font-size:12px">
+                    {{ option_value.name }}
+                    {% if option_value.price %}
+                    ({{ option_value.price_prefix }}{{ option_value.price }})</span>
+                    {% endif %} </label>
+                </div>
+                {% endfor %} </div>
+            </div>
+            {% endif %}
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+            {{ footer }}
+            ]]></search>
+            <add position="before"><![CDATA[
+    <!-- image radio  Selected-->
+    <script type="text/javascript"><!--
+    $('.image_radio').on('click',function(){
+    $('.image_radio').children().css({"border":"none"})
+    $(this).children().css({"border":"2px solid #f00"})
+    })
+    --></script>
+    <!-- image radio end -->
+            ]]></add>
+        </operation>
+    </file>
+
+
+    <file path="system/library/cart/cart.php">
+        <operation>
+            <search><![CDATA[
+                if ($option_query->row['type'] == 'select' || $option_query->row['type'] == 'radio')
+            ]]></search>
+            <add position="replace"><![CDATA[
+                if ($option_query->row['type'] == 'select' || $option_query->row['type'] == 'radio' || $option_query->row['type'] == 'image_radio')
+            ]]></add>
+        </operation>
+    </file>
+    
+</modification>
