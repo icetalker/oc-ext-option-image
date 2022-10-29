@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <modification>
-    <name>Image Radio For Product Options</name>
-    <version>3.0</version>
+    <name>[Icetalker]Image Radio For Product Options</name>
+    <version>1.0</version>
     <author>Martin Hwang</author>
     <code>image_radio</code>
     <link>http://github.com/icetalker</link>
@@ -15,29 +15,22 @@
             ]]></add>
         </operation>
         <operation>
-            <search index="1"><![CDATA[
-            foreach ($option_values as $option_value) {
-            ]]></search>
-            <add position="after"><![CDATA[
-            $image_size = ($option['type'] == 'image_radio')? 100 : 50;
-            ]]></add>
-        </operation>
-        <operation>
             <search><![CDATA[
-            $image = $this->model_tool_image->resize($option_value['image'], 50, 50);
-            ]]></search>
-            <add position="replace" ><![CDATA[
-            $image = $this->model_tool_image->resize($option_value['image'], $image_size, $image_size);
-            ]]></add>
-        </operation>
-        <operation>
-            <search><![CDATA[
-            $image = $this->model_tool_image->resize('no_image.png', 50, 50);
+            if ($option['type'] == 'select' || $option['type'] == 'radio' || $option['type'] == 'checkbox') {
             ]]></search>
             <add position="replace"><![CDATA[
-            $image = $this->model_tool_image->resize('no_image.png', $image_size, $image_size);
+            if ($option['type'] == 'select' || $option['type'] == 'radio' || $option['type'] == 'checkbox' || $option['type'] == 'image_radio') {
             ]]></add>
         </operation>
+        <operation>
+            <search><![CDATA[
+            protected function getForm() {
+            ]]></search>
+            <add position="after"><![CDATA[
+            $data['other_option_image_radio_status'] = $this->config->get('other_option_image_radio_status');
+            ]]></add>
+        </operation>
+        
     </file>
     <file path="admin/controller/catalog/product.php">
         <operation>
@@ -48,25 +41,56 @@
             if ($product_option['type'] == 'select' || $product_option['type'] == 'radio' || $product_option['type'] == 'checkbox' || $product_option['type'] == 'image' || $product_option['type'] == 'image_radio') {
             ]]></add>
         </operation>
+        
+        <operation>
+            <search><![CDATA[
+            $data['product_options'] = array();
+            ]]></search>
+            <add position="after"><![CDATA[
+            $this->load->model('tool/image');
+            ]]></add>
+        </operation>
+        <operation>
+            <search index="0"><![CDATA[
+				foreach ($product_option['product_option_value'] as $product_option_value) {
+            ]]></search>
+            <add position="after"><![CDATA[
+                    if (is_file(DIR_IMAGE . $product_option_value['option_image'])) {
+						$option_image = $product_option_value['option_image'];
+						$option_thumb = $product_option_value['option_image'];
+					} else {
+						$option_image = '';
+						$option_thumb = 'no_image.png';
+					}
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+						'weight_prefix'           => $product_option_value['weight_prefix']
+            ]]></search>
+            <add position="before"><![CDATA[
+						'weight_prefix'           => $product_option_value['weight_prefix'],
+                        'option_image'            => $option_image,
+                        'option_thumb'            => $this->model_tool_image->resize($option_thumb, 100, 100),
+            ]]></add>
+        </operation>
+
+        <operation>
+            <search><![CDATA[
+            protected function getForm() {
+            ]]></search>
+            <add position="after"><![CDATA[
+            $data['other_option_image_radio_status'] = $this->config->get('other_option_image_radio_status');
+            ]]></add>
+        </operation>
     </file>
-    <file path="admin/language/en-gb/catalog/option.php">
+    <file path="admin/language/*/catalog/option.php">
         <operation>
             <search><![CDATA[
             $_['text_radio']         = 'Radio';
             ]]></search>
             <add position="after"><![CDATA[
             $_['text_image_radio']   = 'Image Radio';
-            ]]></add>
-        </operation>
-    </file>
-    <file path="admin/language/zh-cn/catalog/option.php">
-        <operation error="skip">
-            <search><![CDATA[
-            
-            $_['text_radio']         = '单选按钮组';
-            ]]></search>
-            <add position="after"><![CDATA[
-            $_['text_image_radio']   = '图片单选框';
             ]]></add>
         </operation>
     </file>
@@ -79,6 +103,31 @@
             if ($product_option['type'] == 'select' || $product_option['type'] == 'radio' || $product_option['type'] == 'checkbox' || $product_option['type'] == 'image' || $product_option['type'] == 'image_radio') {
             ]]></add>
         </operation>
+        <operation>
+            <search><![CDATA[
+							$this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value SET product_option_id = '" . (int)$product_option_id . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$product_option['option_id'] . "', option_value_id = '" . (int)$product_option_value['option_value_id'] . "', quantity = '" . (int)$product_option_value['quantity'] . "', subtract = '" . (int)$product_option_value['subtract'] . "', price = '" . (float)$product_option_value['price'] . "', price_prefix = '" . $this->db->escape($product_option_value['price_prefix']) . "', points = '" . (int)$product_option_value['points'] . "', points_prefix = '" . $this->db->escape($product_option_value['points_prefix']) . "', weight = '" . (float)$product_option_value['weight'] . "', weight_prefix = '" . $this->db->escape($product_option_value['weight_prefix']) . "'");
+            ]]></search>
+            <add position="replace"><![CDATA[
+							$this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value SET product_option_id = '" . (int)$product_option_id . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$product_option['option_id'] . "', option_value_id = '" . (int)$product_option_value['option_value_id'] . "', quantity = '" . (int)$product_option_value['quantity'] . "', subtract = '" . (int)$product_option_value['subtract'] . "', price = '" . (float)$product_option_value['price'] . "', price_prefix = '" . $this->db->escape($product_option_value['price_prefix']) . "', points = '" . (int)$product_option_value['points'] . "', points_prefix = '" . $this->db->escape($product_option_value['points_prefix']) . "', weight = '" . (float)$product_option_value['weight'] . "', weight_prefix = '" . $this->db->escape($product_option_value['weight_prefix']) . "', option_image = '" . $this->db->escape($product_option_value['option_image']) . "'");
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+							$this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value SET product_option_value_id = '" . (int)$product_option_value['product_option_value_id'] . "', product_option_id = '" . (int)$product_option_id . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$product_option['option_id'] . "', option_value_id = '" . (int)$product_option_value['option_value_id'] . "', quantity = '" . (int)$product_option_value['quantity'] . "', subtract = '" . (int)$product_option_value['subtract'] . "', price = '" . (float)$product_option_value['price'] . "', price_prefix = '" . $this->db->escape($product_option_value['price_prefix']) . "', points = '" . (int)$product_option_value['points'] . "', points_prefix = '" . $this->db->escape($product_option_value['points_prefix']) . "', weight = '" . (float)$product_option_value['weight'] . "', weight_prefix = '" . $this->db->escape($product_option_value['weight_prefix']) . "'");
+            ]]></search>
+            <add position="replace"><![CDATA[
+							$this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value SET product_option_value_id = '" . (int)$product_option_value['product_option_value_id'] . "', product_option_id = '" . (int)$product_option_id . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$product_option['option_id'] . "', option_value_id = '" . (int)$product_option_value['option_value_id'] . "', quantity = '" . (int)$product_option_value['quantity'] . "', subtract = '" . (int)$product_option_value['subtract'] . "', price = '" . (float)$product_option_value['price'] . "', price_prefix = '" . $this->db->escape($product_option_value['price_prefix']) . "', points = '" . (int)$product_option_value['points'] . "', points_prefix = '" . $this->db->escape($product_option_value['points_prefix']) . "', weight = '" . (float)$product_option_value['weight'] . "', weight_prefix = '" . $this->db->escape($product_option_value['weight_prefix']) . "', option_image = '" . $this->db->escape($product_option_value['option_image']) ."'");
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+					'weight_prefix'           => $product_option_value['weight_prefix']
+            ]]></search>
+            <add position="replace"><![CDATA[
+					'weight_prefix'           => $product_option_value['weight_prefix'],
+					'option_image'            => $product_option_value['option_image'],
+            ]]></add>
+        </operation>
     </file>
     <file path="admin/view/template/catalog/option_form.twig">
         <operation>
@@ -86,6 +135,7 @@
             {% if type == 'checkbox' %}
             ]]></search>
             <add position="before"><![CDATA[
+            {% if other_option_image_radio_status %}
                 {% if type == 'image_radio' %}
                 
                 
@@ -99,6 +149,7 @@
                   
                 
                 {% endif %}
+            {% endif %}    
             ]]></add>
         </operation>
         <operation>
@@ -111,20 +162,144 @@
         </operation>
     </file>
     <file path="admin/view/template/catalog/product_form.twig">
+
         <operation>
-            <search><![CDATA[
-            {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' %}
+            <search index="0"><![CDATA[
+           {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' %}
             ]]></search>
             <add position="replace"><![CDATA[
             {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' or product_option.type == 'image_radio' %}
             ]]></add>
         </operation>
         <operation>
+            <search index="0"><![CDATA[
+            <td class="text-right">{{ entry_weight }}</td>
+            ]]></search>
+            <add position="after"><![CDATA[
+            {% if other_option_image_radio_status and (product_option.type == 'image_radio') %}
+                <td class="text-right">{{ entry_image }}</td>
+            {% endif %}
+            ]]></add>
+        </operation>
+        <operation error="skip">
+            <search><![CDATA[
+            <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][weight]" value="{{ product_option_value.weight }}" placeholder="{{ entry_weight }}" class="form-control" /></td>
+            ]]></search>
+            <add position="after"><![CDATA[
+            {% if other_option_image_radio_status and product_option.type == 'image_radio' %}
+            <td class="text-center"><a href="" id="thumb-image-{{ option_row }}{{ option_value_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ product_option_value.option_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a><input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][option_image]" value="{{ product_option_value.option_image }}" id="input-image{{ option_row }}{{ option_value_row }}" /></td>
+            
+            {% endif %}
+            ]]></add>
+        </operation>
+        <operation>
+            <search index="0"><![CDATA[<td colspan="6"></td>]]></search>
+            <add position="replace"><![CDATA[
+            {% if other_option_image_radio_status and product_option.type == 'image_radio' %}
+            <td colspan="7"></td>
+            {% else %}
+            <td colspan="6"></td>
+            {% endif %}
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+            <td class="text-left"><button type="button" onclick="addOptionValue('{{ option_row }}');" data-toggle="tooltip" title="{{ button_option_value_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+            ]]></search>
+            <add position="replace"><![CDATA[
+            {% if other_option_image_radio_status and product_option.type == 'image_radio' %}
+            <td class="text-left"><button type="button" onclick="addOptionValueWithImage('{{ option_row }}');" data-toggle="tooltip" title="{{ button_option_value_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+            {% else %}
+            <td class="text-left"><button type="button" onclick="addOptionValue('{{ option_row }}');" data-toggle="tooltip" title="{{ button_option_value_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+        
+            {% endif %}
+            ]]></add>
+        </operation>
+        <operation>
             <search><![CDATA[
             if (item['type'] == 'select' || item['type'] == 'radio' || item['type'] == 'checkbox' || item['type'] == 'image') {
             ]]></search>
-            <add position="replace"><![CDATA[
-            if (item['type'] == 'select' || item['type'] == 'radio' || item['type'] == 'checkbox' || item['type'] == 'image' || item['type'] == 'image_radio') {
+            <add position="before"><![CDATA[
+            {% if other_option_image_radio_status %}
+            if (item['type'] == 'image_radio') {
+                html += '<div class="table-responsive">';
+                html += '  <table id="option-value' + option_row + '" class="table table-striped table-bordered table-hover">';
+                html += '  	 <thead>';
+                html += '      <tr>';
+                html += '        <td class="text-left">{{ entry_option_value }}</td>';
+                html += '        <td class="text-right">{{ entry_quantity }}</td>';
+                html += '        <td class="text-left">{{ entry_subtract }}</td>';
+                html += '        <td class="text-right">{{ entry_price }}</td>';
+                html += '        <td class="text-right">{{ entry_option_points }}</td>';
+                html += '        <td class="text-right">{{ entry_weight }}</td>';
+                html += '        <td class="text-right">{{ entry_image }}</td>';
+                html += '        <td></td>';
+                html += '      </tr>';
+                html += '  	 </thead>';
+                html += '  	 <tbody>';
+                html += '    </tbody>';
+                html += '    <tfoot>';
+                html += '      <tr>';
+                html += '        <td colspan="7"></td>';
+                html += '        <td class="text-left"><button type="button" onclick="addOptionValueWithImage(' + option_row + ');" data-toggle="tooltip" title="{{ button_option_value_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>';
+                html += '      </tr>';
+                html += '    </tfoot>';
+                html += '  </table>';
+                html += '</div>';
+
+                html += '  <select id="option-values' + option_row + '" style="display: none;">';
+
+                for (i = 0; i < item['option_value'].length; i++) {
+                    html += '  <option value="' + item['option_value'][i]['option_value_id'] + '">' + item['option_value'][i]['name'] + '</option>';
+                }
+
+                html += '  </select>';
+                html += '</div>';
+            }
+            {% endif %}
+            ]]></add>
+        </operation>
+        <operation>
+            <search index="0"><![CDATA[
+            function addOptionValue(option_row) {
+            ]]></search>
+            <add position="before"><![CDATA[
+            {% if other_option_image_radio_status %}
+            function addOptionValueWithImage(option_row) {
+                html  = '<tr id="option-value-row' + option_value_row + '">';
+                html += '  <td class="text-left"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][option_value_id]" class="form-control">';
+                html += $('#option-values' + option_row).html();
+                html += '  </select><input type="hidden" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][product_option_value_id]" value="" /></td>';
+                html += '  <td class="text-right"><input type="text" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][quantity]" value="" placeholder="{{ entry_quantity }}" class="form-control" /></td>';
+                html += '  <td class="text-left"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][subtract]" class="form-control">';
+                html += '    <option value="1">{{ text_yes }}</option>';
+                html += '    <option value="0">{{ text_no }}</option>';
+                html += '  </select></td>';
+                html += '  <td class="text-right"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][price_prefix]" class="form-control">';
+                html += '    <option value="+">+</option>';
+                html += '    <option value="-">-</option>';
+                html += '  </select>';
+                html += '  <input type="text" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][price]" value="" placeholder="{{ entry_price }}" class="form-control" /></td>';
+                html += '  <td class="text-right"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][points_prefix]" class="form-control">';
+                html += '    <option value="+">+</option>';
+                html += '    <option value="-">-</option>';
+                html += '  </select>';
+                html += '  <input type="text" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][points]" value="" placeholder="{{ entry_points }}" class="form-control" /></td>';
+                html += '  <td class="text-right"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][weight_prefix]" class="form-control">';
+                html += '    <option value="+">+</option>';
+                html += '    <option value="-">-</option>';
+                html += '  </select>';
+                html += '  <input type="text" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][weight]" value="" placeholder="{{ entry_weight }}" class="form-control" /></td>';
+                html += '<td class="text-center"><a href="" id="thumb-image' + option_row + option_value_row +'" data-toggle="image" class="img-thumbnail"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a><input type="hidden" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][option_image]"  id="input-image' + option_row + option_value_row + '" value="" /></td>';
+                html += '  <td class="text-left"><button type="button" onclick="$(this).tooltip(\'destroy\');$(\'#option-value-row' + option_value_row + '\').remove();" data-toggle="tooltip" rel="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+                html += '</tr>';
+
+                $('#option-value' + option_row + ' tbody').append(html);
+                $('[rel=tooltip]').tooltip();
+
+                option_value_row++;
+            }
+            {% endif %}
             ]]></add>
         </operation>
     </file>
@@ -132,18 +307,40 @@
     <file path="catalog/controller/product/product.php">
         <operation>
             <search><![CDATA[
-            $product_option_value_data = array();
+            'name'                    => $option_value['name'],
             ]]></search>
             <add position="after"><![CDATA[
-            $image_size = $option['type'] == 'image_radio'? 100 : 50;
+            'option_image'            => $option_value['option_image'],
             ]]></add>
         </operation>
         <operation>
             <search><![CDATA[
             'image'                   => $this->model_tool_image->resize($option_value['image'], 50, 50),
             ]]></search>
-            <add position="replace"><![CDATA[
-            'image'                   => $this->model_tool_image->resize($option_value['image'], $image_size, $image_size),
+            <add position="after"><![CDATA[
+            'option_image'                   => $this->model_tool_image->resize($option_value['option_image'], 100, 100),
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+            $data['options'] = array();
+            ]]></search>
+            <add position="before"><![CDATA[
+        //image_radio
+		$data['other_option_image_radio_status'] = $this->config->get('other_option_image_radio_status');
+		$other_option_background_color = $this->config->get('other_option_image_radio_background_color');
+		$data['other_option_background_color'] = $other_option_background_color ? $other_option_background_color : '#cba';
+		$data['other_option_image_radio_text_color'] = $this->config->get('other_option_image_radio_text_color') ?? '#000000';
+            ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/model/catalog/product.php">
+        <operation>
+            <search><![CDATA[
+            'name'                    => $product_option_value['name'],
+            ]]></search>
+            <add position="after"><![CDATA[
+            'option_image'            => $product_option_value['option_image'],
             ]]></add>
         </operation>
     </file>
@@ -157,21 +354,21 @@
             ]]></add>
         </operation>
     </file>
-    <file path="catalog/view/theme/default/template/product/product.twig">
+    <file path="catalog/view/theme/*/template/product/product.twig">
         <operation>
             <search><![CDATA[
             {% if option.type == 'checkbox' %}
             ]]></search>
             <add position="before"><![CDATA[
-            {% if option.type == 'image_radio' %}
+            {% if option.type == 'image_radio' and other_option_image_radio_status %}
             <div class="form-group{% if option.required %} required {% endif %}">
               <label class="control-label text-prodecorop">{{ option.name }}</label>
               <div id="input-option{{ option.product_option_id }}" class="custom-radio" style="display:grid;grid-template-columns:repeat(auto-fill,200px);grid-gap:10px"> {% for option_value in option.product_option_value %}
                 <div class="image_radio">
-                  <label style="background-color:#cba;border-radius:5px;display:flex;">
-                    <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" style="clip:rect(0,0,0,0);position:absolute" />
-                    {% if option_value.image %} <img src="{{ option_value.image }}" alt="{{ option_value.name }} {% if option_value.price %} {{ option_value.price_prefix }} {{ option_value.price }} {% endif %}" data-price="{{ option_value.price }}" style="width:100px;pointer-events:event;border-radius:5px;" /> {% endif %}
-                    <span class="" style="display:inline-block;margin:auto 5px;font-size:12px">
+                  <label style="background-color:{{ other_option_background_color }}; border-radius:5px; display:flex; color:{{ other_option_image_radio_text_color }}">
+                    <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" style="clip:rect(0,0,0,0); position:absolute" />
+                    {% if option_value.option_image %} <img src="{{ option_value.option_image }}" alt="{{ option_value.name }} {% if option_value.price %} {{ option_value.price_prefix }} {{ option_value.price }} {% endif %}" data-price="{{ option_value.price }}" style="width:100px; pointer-events:event; border-radius:5px;" /> {% endif %}
+                    <span class="" style="display:inline-block; margin:auto 5px; font-size:12px">
                     {{ option_value.name }}
                     {% if option_value.price %}
                     ({{ option_value.price_prefix }}{{ option_value.price }})</span>
@@ -189,16 +386,15 @@
             <add position="before"><![CDATA[
     <!-- image radio  Selected-->
     <script type="text/javascript"><!--
-    $('.image_radio').on('click',function(){
-    $('.image_radio').children().css({"border":"none"})
-    $(this).children().css({"border":"2px solid #f00"})
+        $('.image_radio').on('click',function(){
+        $('.image_radio').children().css({"border":"none"})
+        $(this).children().css({"border":"2px solid #f00"})
     })
     --></script>
     <!-- image radio end -->
             ]]></add>
         </operation>
     </file>
-
 
     <file path="system/library/cart/cart.php">
         <operation>
@@ -207,6 +403,17 @@
             ]]></search>
             <add position="replace"><![CDATA[
                 if ($option_query->row['type'] == 'select' || $option_query->row['type'] == 'radio' || $option_query->row['type'] == 'image_radio')
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="admin/controller/startup/permission.php">
+        <operation>
+            <search><![CDATA[
+            'extension/module',
+            ]]></search>
+            <add position="after"><![CDATA[
+            'extension/other',
             ]]></add>
         </operation>
     </file>

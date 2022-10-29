@@ -1,0 +1,111 @@
+{{ header }}{{column_left}}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <button type="submit" form="form-topmenu" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary">
+                    <i class="fa fa-save"></i>
+                </button>
+                <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default">
+                    <i class="fa fa-reply"></i>
+                </a>
+            </div>
+            <h1>{{ heading_title }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+        {% if error_warning %}
+            <div class="alert alert-danger">
+                <i class="fa fa-exclamation-circle"></i> 
+                {{ error_warning }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+    
+        {% if success %}
+            <div class="alert alert-success"><i class="fa fa-check-circle"></i>
+                {{ success }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+            </div>
+            <div class="panel-body">
+                <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-option" class="form-horizontal">
+                        
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+                        <div class="col-sm-8">
+                            <select name="other_option_image_radio_status" id="input-status" class="form-control">
+                                {% if other_option_image_radio_status %}
+                                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                                    <option value="0">{{ text_disabled }}</option>
+                                {% else %}
+                                    <option value="1">{{ text_enabled }}</option>
+                                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">{{ entry_background_color }}</label>
+                        <div class="col-sm-8">
+                            <div id="bgcolorpicker" class="bfh-colorpicker" data-name="other_option_image_radio_background_color" data-color="{{ other_option_image_radio_background_color }}"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">{{ entry_text_color }}</label>
+                        <div class="col-sm-8">
+                            <div id="txtcolorpicker" class="bfh-colorpicker" data-name="other_option_image_radio_text_color" data-color="{{ other_option_image_radio_text_color }}"></div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"> Demo </label>
+                        <div class="col-sm-8">
+                            <div class="form-group">
+                                <label class="control-label text-prodecorop"> Image Option </label>
+                                <div id="input-option" class="custom-radio" style="display:grid;grid-template-columns:repeat(auto-fill,200px);grid-gap:10px"> 
+                                    <div class="image_radio">
+                                        <label id="demo-label" style="background-color:{{ other_option_image_radio_background_color }}; border-radius:5px; display:flex; color:{{ other_option_image_radio_text_color }}">
+                                            <input type="radio" style="clip:rect(0,0,0,0); position:absolute" />
+                                            <img src="http://source.unsplash.com/random/100x100" alt="" data-price="" style="width:100px; pointer-events:event; border-radius:5px;" /> 
+                                            <span class="" style="display:inline-block; margin:auto 5px; font-size:12px">
+                                            Random Picture (+$15.00)
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#bgcolorpicker').on('change.bfhcolorpicker', function(e){
+        let bgcolor = e.currentTarget.value
+        $('#demo-label').css({"background-color": bgcolor})
+    })
+    $('#txtcolorpicker').on('change.bfhcolorpicker', function(e){
+        let color = e.currentTarget.value
+        $('#demo-label').css({"color": color})
+    })
+</script>
+
+{{ footer }}
